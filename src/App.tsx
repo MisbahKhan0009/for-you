@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity, X, Headphones } from "lucide-react";
+import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity, X, Headphones, Volume2, VolumeX } from "lucide-react";
+import LoadingScreen from "./components/LoadingScreen";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -13,6 +14,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAudioReady, setIsAudioReady] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,61 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    // Try to play audio after loading is complete
+    const playAudio = async () => {
+      try {
+        if (audioRef.current) {
+          await audioRef.current.play();
+          setIsAudioReady(true);
+        }
+      } catch (error) {
+        console.log("Audio autoplay failed:", error);
+      }
+    };
+    playAudio();
+  };
+
+  // Add the missing handleAudioEnabled function
+  // Update the handleAudioEnabled function to be more robust
+  // Update the handleAudioEnabled function to toggle mute/unmute
+  const handleAudioEnabled = async () => {
+    try {
+      if (audioRef.current) {
+        if (!isAudioReady) {
+          // First time playing - initialize audio
+          audioRef.current.volume = 0.5;
+          const playPromise = audioRef.current.play();
+          
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log("Audio started playing successfully");
+                setIsAudioReady(true);
+              })
+              .catch(error => {
+                console.error("Audio play failed:", error);
+                // Try again with user interaction
+                const playOnClick = () => {
+                  audioRef.current?.play()
+                    .then(() => setIsAudioReady(true))
+                    .catch(e => console.error("Second attempt failed:", e));
+                };
+                playOnClick();
+              });
+          }
+        } else {
+          // Toggle mute/unmute
+          audioRef.current.muted = !audioRef.current.muted;
+          setIsAudioMuted(audioRef.current.muted);
+        }
+      }
+    } catch (error) {
+      console.error("Audio control failed:", error);
+    }
+  };
+
   // Add ScrollTrigger effect
   useEffect(() => {
     if (scrollRef.current && containerRef.current) {
@@ -99,40 +156,63 @@ function App() {
     }
   }, []);
 
-  // Cursor effect
-  const updateCursor = (e: MouseEvent) => {
-    setCursorPosition({ x: e.clientX, y: e.clientY });
-  };
-  window.addEventListener("mousemove", updateCursor);
+  // Cursor effect - move this inside a useEffect
+  useEffect(() => {
+    // Check if device supports hover (non-touch device)
+    const isNonTouchDevice = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    
+    if (isNonTouchDevice) {
+      const updateCursor = (e: MouseEvent) => {
+        setCursorPosition({ x: e.clientX, y: e.clientY });
+      };
+      
+      window.addEventListener("mousemove", updateCursor);
+      
+      // Clean up the event listener when component unmounts
+      return () => {
+        window.removeEventListener("mousemove", updateCursor);
+      };
+    }
+  }, []);
+  
   return (
     <>
-      <audio ref={audioRef} src="/bg audio.mp3" loop preload="auto" />
+      {/* Update the audio element with correct path and attributes */}
+      <audio 
+        ref={audioRef} 
+        src="/audio/bg audio.mp3" 
+        loop 
+        preload="auto"
+        onCanPlayThrough={() => console.log("Audio loaded and ready to play")}
+        onError={(e) => console.error("Audio error:", e)}
+      />
 
       <AnimatePresence>
         {isLoading && (
-          <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-[#355070] flex flex-col items-center justify-center">
-            <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-                rotate: [0, 360],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="w-24 h-24 border-4 border-[#eaac8b] rounded-full border-t-transparent"
-            />
-            <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="text-[#eaac8b] text-2xl mt-8 font-semibold">
-              Loading...
-            </motion.h2>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="absolute bottom-10 flex items-center text-white/80 space-x-2">
-              <Headphones className="w-5 h-5" />
-              <span>Please use headphones for the best experience</span>
-            </motion.div>
-          </motion.div>
+          <LoadingScreen 
+            onLoadingComplete={handleLoadingComplete} 
+            onAudioEnabled={handleAudioEnabled}
+            isAudioReady={isAudioReady}
+          />
         )}
       </AnimatePresence>
+
+      {/* Audio control button when loading is complete */}
+      {!isLoading && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed bottom-4 right-4 z-40 bg-[#355070]/80 backdrop-blur-sm p-3 rounded-full border border-[#eaac8b]/30"
+          onClick={handleAudioEnabled}
+          title={!isAudioReady ? "Enable Audio" : (isAudioMuted ? "Unmute Audio" : "Mute Audio")}
+        >
+          {isAudioReady && isAudioMuted ? (
+            <VolumeX className="w-5 h-5 text-white/70" />
+          ) : (
+            <Volume2 className={`w-5 h-5 ${isAudioReady ? "text-[#eaac8b]" : "text-white/70"}`} />
+          )}
+        </motion.button>
+      )}
 
       <div
         className="custom-cursor"
