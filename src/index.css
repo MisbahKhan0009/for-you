@@ -16,7 +16,7 @@ body {
 }
 
 .custom-cursor {
-  @apply fixed w-8 h-8 rounded-full pointer-events-none mix-blend-difference z-50;
+  @apply fixed w-12 h-12 rounded-full pointer-events-none mix-blend-difference z-50;
   background: var(--highlight);
   transition: transform 0.2s ease;
 }

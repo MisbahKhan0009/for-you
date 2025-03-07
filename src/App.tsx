@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity, X, Headphones } from 'lucide-react';
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    const updateCursor = (e: MouseEvent) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', updateCursor);
-    return () => window.removeEventListener('mousemove', updateCursor);
-  }, []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAudioReady, setIsAudioReady] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const memories = [
     {
@@ -55,12 +58,111 @@ function App() {
     "The sound of your laughter is my favorite melody"
   ];
 
+  useEffect(() => {
+    // Loading screen timer
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      // Try to play audio after user interaction
+      const playAudio = async () => {
+        try {
+          if (audioRef.current) {
+            await audioRef.current.play();
+          }
+        } catch (error) {
+          console.log('Audio autoplay failed:', error);
+        }
+      };
+      playAudio();
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Add ScrollTrigger effect
+  useEffect(() => {
+    if (scrollRef.current && containerRef.current) {
+      const scrollContainer = scrollRef.current;
+      const scrollWidth = scrollContainer.scrollWidth;
+      const containerWidth = containerRef.current.offsetWidth;
+
+      gsap.to(scrollContainer, {
+        x: -(scrollWidth - containerWidth),
+        ease: "none",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          pin: true,
+          start: "top center",
+          end: () => `+=${scrollWidth - containerWidth}`,
+          scrub: 1,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      return () => {
+        ScrollTrigger.getAll().forEach(t => t.kill());
+      };
+    }
+  }, []);
+
+  // Cursor effect
+  const updateCursor = (e: MouseEvent) => {
+    setCursorPosition({ x: e.clientX, y: e.clientY });
+  };
+  window.addEventListener('mousemove', updateCursor);
   return (
     <>
+      <audio
+        ref={audioRef}
+        src="/bg audio.mp3"
+        loop
+        preload="auto"
+      />
+
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-[#355070] flex flex-col items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="w-24 h-24 border-4 border-[#eaac8b] rounded-full border-t-transparent"
+            />
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-[#eaac8b] text-2xl mt-8 font-semibold"
+            >
+              Loading...
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="absolute bottom-10 flex items-center text-white/80 space-x-2"
+            >
+              <Headphones className="w-5 h-5" />
+              <span>Please use headphones for the best experience</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         className="custom-cursor"
         style={{
-          transform: `translate(${cursorPosition.x - 16}px, ${cursorPosition.y - 16}px)`,
+          transform: `translate(${cursorPosition.x - 24}px, ${cursorPosition.y - 24}px)`,
         }}
       />
       
@@ -227,21 +329,25 @@ function App() {
 
           {/* Memories Section */}
           <motion.div
+            ref={containerRef}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
-            className="max-w-6xl mx-auto mb-16 overflow-hidden"
+            className="max-w-6xl mx-auto mb-16 relative"
           >
             <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">Our Beautiful Memories</h2>
-            <div className="flex space-x-6 px-4 pb-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+            <div 
+              ref={scrollRef}
+              className="flex gap-6 px-4 pb-8 w-fit"
+            >
               {memories.map((memory, index) => (
                 <motion.div
                   key={index}
-                  className="bg-[#355070]/30 rounded-xl overflow-hidden backdrop-blur-sm flex-none w-80 snap-center"
+                  className="bg-[#355070]/30 rounded-xl overflow-hidden backdrop-blur-sm flex-none w-80"
                   initial={{ opacity: 0, x: 100 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true }}
                   transition={{ delay: index * 0.2, duration: 0.5 }}
                   whileHover={{ y: -10 }}
                 >
@@ -265,9 +371,248 @@ function App() {
             whileTap={{ scale: 0.95 }}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
+            onClick={() => setIsModalOpen(true)}
           >
             Forgive Me? ❤️
           </motion.button>
+
+          {/* Apology Modal */}
+          {isModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="absolute inset-0 bg-black/40" onClick={() => setIsModalOpen(false)} />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative w-full max-w-2xl p-8 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl text-white"
+              >
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+                
+                <div className="text-center">
+                  <Heart className="w-12 h-12 text-[#e56b6f] mx-auto mb-6 heart-beat" />
+                  <h3 className="text-3xl font-bold text-[#eaac8b] mb-4">My Heartfelt Apology</h3>
+                  <p className="text-lg mb-6 leading-relaxed">
+                    My dearest, I want you to know that my heart aches for causing you pain. 
+                    Your happiness means everything to me, and I realize now more than ever 
+                    how precious our love is. I promise to learn from my mistakes and be the 
+                    person you deserve – someone who cherishes and respects you completely.
+                  </p>
+                  <div className="space-y-4 mb-8">
+                    <p className="italic text-white/80">
+                      "Love is patient, love is kind. It always protects, always trusts, 
+                      always hopes, always perseveres."
+                    </p>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-[#e56b6f] hover:bg-[#b56576] text-white px-6 py-2 rounded-full text-lg transition-colors duration-300"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    I Understand ❤️
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* Our Song Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mt-16 mb-16 bg-[#6d597a]/20 p-8 rounded-2xl backdrop-blur-sm"
+          >
+            <div className="flex items-center justify-center mb-6">
+              <Music className="w-8 h-8 text-[#eaac8b] mr-3" />
+              <h2 className="text-4xl font-bold text-[#eaac8b]">Our Song</h2>
+            </div>
+            <p className="text-white text-lg mb-4">
+              Remember this melody that always makes us dance together?
+            </p>
+            <div className="bg-[#355070]/30 p-6 rounded-lg text-white text-center">
+              <p className="italic">"Can't Help Falling in Love" - Elvis Presley</p>
+              <p className="mt-4 text-sm">
+                "Take my hand, take my whole life too<br />
+                For I can't help falling in love with you..."
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Little Things Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-16 bg-[#355070]/30 p-8 rounded-2xl backdrop-blur-sm"
+          >
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">Little Things I Miss</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { text: "Your morning texts that brighten my day" },
+                { text: "The way you scrunch your nose when you laugh" },
+                { text: "Our random midnight snack adventures" },
+                { text: "How you always know when I need a hug" },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-[#6d597a]/20 p-4 rounded-lg"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Stars className="w-5 h-5 text-[#eaac8b] mb-2" />
+                  <p className="text-white">{item.text}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* My Wish Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-16 bg-[#6d597a]/20 p-8 rounded-2xl backdrop-blur-sm text-center"
+          >
+            <Gift className="w-12 h-12 text-[#eaac8b] mx-auto mb-4" />
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-4">My Only Wish</h2>
+            <p className="text-white text-lg">
+              Is to see your beautiful smile again, to hold your hand, and to make everything right.
+              You're not just my love, you're my best friend, my comfort place, my home.
+              Please give me another chance to prove how much you mean to me.
+            </p>
+          </motion.div>
+
+          {/* Growth & Change Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-16 bg-[#355070]/30 p-8 rounded-2xl backdrop-blur-sm"
+          >
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">How I'm Growing For Us</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { title: "Self-Reflection", text: "Taking time to understand my actions and their impact" },
+                { title: "Active Listening", text: "Learning to listen more and understand your perspective" },
+                { title: "Emotional Growth", text: "Working on expressing my feelings better" },
+                { title: "Personal Development", text: "Becoming the best version of myself for us" },
+              ].map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-[#6d597a]/20 p-6 rounded-lg"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <h3 className="text-[#eaac8b] font-bold text-xl mb-2">{item.title}</h3>
+                  <p className="text-white">{item.text}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Special Moments Timeline */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-16 bg-[#6d597a]/20 p-8 rounded-2xl backdrop-blur-sm"
+          >
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">Our Journey Together</h2>
+            <div className="space-y-8">
+              {[
+                { date: "First Met", text: "The day that changed my life forever" },
+                { date: "First Kiss", text: "A moment of pure magic" },
+                { date: "First 'I Love You'", text: "Words that came straight from my heart" },
+                { date: "Moving Forward", text: "Creating new memories, stronger than ever" },
+              ].map((moment, index) => (
+                <motion.div
+                  key={index}
+                  className="flex items-start space-x-4"
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2 }}
+                >
+                  <div className="w-32 flex-shrink-0">
+                    <p className="text-[#eaac8b] font-bold">{moment.date}</p>
+                  </div>
+                  <div className="flex-grow bg-[#355070]/30 p-4 rounded-lg">
+                    <p className="text-white">{moment.text}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Daily Reminders */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-16 bg-[#355070]/30 p-8 rounded-2xl backdrop-blur-sm"
+          >
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">Daily Reminders</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                "I think about you every morning",
+                "Your happiness is my priority",
+                "I'm grateful for your love",
+                "You make me want to be better",
+                "Our love is worth fighting for",
+                "You're my favorite person"
+              ].map((reminder, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-[#6d597a]/20 p-4 rounded-lg text-center"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <p className="text-white">{reminder}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Footer Section */}
+          <motion.footer
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-16 pb-8 text-center text-white/70"
+          >
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <Heart className="w-5 h-5 text-[#e56b6f]" />
+              <span>Made with love</span>
+              <Heart className="w-5 h-5 text-[#e56b6f]" />
+            </div>
+            <p className="text-sm">
+              © {new Date().getFullYear()} | Forever Yours
+            </p>
+          </motion.footer>
         </motion.div>
 
         {/* Floating Background Elements */}
