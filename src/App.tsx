@@ -29,36 +29,60 @@ function App() {
         const screenSize = `${window.screen.width}x${window.screen.height}`;
         const visitTime = new Date().toISOString();
         
-        // Get IP address using a public API
+        // Get IP address using a more reliable API
         let ipAddress = "Unknown";
         try {
-          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          // Using ipinfo.io which provides more reliable IP data
+          const ipResponse = await fetch('https://ipinfo.io/json');
           const ipData = await ipResponse.json();
-          ipAddress = ipData.ip;
+          ipAddress = ipData.ip || "Unknown";
+          
+          // Add additional location data if available
+          const location = ipData.city && ipData.country ? 
+            `${ipData.city}, ${ipData.country}` : "Unknown location";
+          
+          // Create a FormData object with the visitor information
+          const formData = new FormData();
+          formData.append('_subject', 'Website Visit Notification - For You');
+          formData.append('email', 'mkhanmisbah007@gmail.com');
+          formData.append('website', 'https://for-you-5ez.pages.dev/');
+          formData.append('userAgent', userAgent);
+          formData.append('screenSize', screenSize);
+          formData.append('visitTime', visitTime);
+          formData.append('ipAddress', ipAddress);
+          formData.append('location', location);
+          
+          // Send the data to FormSubmit service
+          await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
+          
+          console.log('Visit notification sent with IP address:', ipAddress);
         } catch (ipError) {
           console.error('Failed to fetch IP address:', ipError);
+          
+          // Fallback to send notification without IP if IP fetch fails
+          const formData = new FormData();
+          formData.append('_subject', 'Website Visit Notification - For You');
+          formData.append('email', 'mkhanmisbah007@gmail.com');
+          formData.append('website', 'https://for-you-5ez.pages.dev/');
+          formData.append('userAgent', userAgent);
+          formData.append('screenSize', screenSize);
+          formData.append('visitTime', visitTime);
+          formData.append('ipAddress', 'Failed to retrieve');
+          
+          await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
         }
-        
-        // Create a FormData object with the visitor information
-        const formData = new FormData();
-        formData.append('email', 'mkhanmisbah007@gmail.com');
-        formData.append('website', 'https://for-you-5ez.pages.dev/');
-        formData.append('userAgent', userAgent);
-        formData.append('screenSize', screenSize);
-        formData.append('visitTime', visitTime);
-        formData.append('ipAddress', ipAddress);
-        
-        // Send the data to a service that will email you
-        // Using FormSubmit.co as a simple email service
-        await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-        
-        console.log('Visit notification sent with IP address');
       } catch (error) {
         console.error('Failed to send visit notification:', error);
       }
