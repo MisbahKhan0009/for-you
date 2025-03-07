@@ -18,6 +18,55 @@ function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Add visitor tracking effect
+  useEffect(() => {
+    // Function to send visit notification
+    const sendVisitNotification = async () => {
+      try {
+        // Get some basic info about the visitor
+        const userAgent = navigator.userAgent;
+        const screenSize = `${window.screen.width}x${window.screen.height}`;
+        const visitTime = new Date().toISOString();
+        
+        // Get IP address using a public API
+        let ipAddress = "Unknown";
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          ipAddress = ipData.ip;
+        } catch (ipError) {
+          console.error('Failed to fetch IP address:', ipError);
+        }
+        
+        // Create a FormData object with the visitor information
+        const formData = new FormData();
+        formData.append('email', 'mkhanmisbah007@gmail.com');
+        formData.append('website', 'https://for-you-5ez.pages.dev/');
+        formData.append('userAgent', userAgent);
+        formData.append('screenSize', screenSize);
+        formData.append('visitTime', visitTime);
+        formData.append('ipAddress', ipAddress);
+        
+        // Send the data to a service that will email you
+        // Using FormSubmit.co as a simple email service
+        await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        
+        console.log('Visit notification sent with IP address');
+      } catch (error) {
+        console.error('Failed to send visit notification:', error);
+      }
+    };
+    
+    // Send the notification
+    sendVisitNotification();
+  }, []);
 
   const memories = [
     {
