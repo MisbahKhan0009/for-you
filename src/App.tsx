@@ -28,65 +28,104 @@ function App() {
         const userAgent = navigator.userAgent;
         const screenSize = `${window.screen.width}x${window.screen.height}`;
         const visitTime = new Date().toISOString();
+        const currentURL = window.location.href;
 
         // Get IP address using a more reliable API
         let ipAddress = "Unknown";
         try {
           // Using ipinfo.io which provides more reliable IP data
-          const ipResponse = await fetch("https://ipinfo.io/json");
+          const ipResponse = await fetch("https://ipinfo.io/json", {
+            method: "GET",
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
           const ipData = await ipResponse.json();
           ipAddress = ipData.ip || "Unknown";
 
           // Add additional location data if available
           const location = ipData.city && ipData.country ? `${ipData.city}, ${ipData.country}` : "Unknown location";
 
-          // Create a FormData object with the visitor information
+          // Create the form data with all visitor information
           const formData = new FormData();
-          formData.append("_subject", "Website Visit Notification - For You");
+          formData.append("_subject", `Website Visit - ${currentURL}`);
           formData.append("email", "mkhanmisbah007@gmail.com");
-          formData.append("website", "https://for-you-5ez.pages.dev/");
+          formData.append("website", currentURL);
           formData.append("userAgent", userAgent);
           formData.append("screenSize", screenSize);
           formData.append("visitTime", visitTime);
           formData.append("ipAddress", ipAddress);
           formData.append("location", location);
-
-          // Send the data to FormSubmit service
-          await fetch("https://formsubmit.co/mkhanmisbah007@gmail.com", {
-            method: "POST",
-            body: formData,
-            headers: {
-              Accept: "application/json",
-            },
-          });
+          
+          // Use a direct form submission approach
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = 'https://formsubmit.co/mkhanmisbah007@gmail.com';
+          form.style.display = 'none';
+          
+          // Add all form data as hidden inputs
+          for (const [key, value] of formData.entries()) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value.toString();
+            form.appendChild(input);
+          }
+          
+          // Add honeypot field to prevent spam
+          const honeypot = document.createElement('input');
+          honeypot.type = 'text';
+          honeypot.name = '_honey';
+          honeypot.style.display = 'none';
+          form.appendChild(honeypot);
+          
+          // Add to document, submit, and remove
+          document.body.appendChild(form);
+          form.submit();
+          
+          // Don't remove the form immediately to allow submission to complete
+          setTimeout(() => {
+            document.body.removeChild(form);
+          }, 1000);
 
           console.log("Visit notification sent with IP address:", ipAddress);
         } catch (ipError) {
           console.error("Failed to fetch IP address:", ipError);
-
-          // Fallback to send notification without IP if IP fetch fails
+          
+          // Fallback with minimal information if IP lookup fails
           const formData = new FormData();
-          formData.append("_subject", "Website Visit Notification - For You");
+          formData.append("_subject", `Website Visit - ${currentURL}`);
           formData.append("email", "mkhanmisbah007@gmail.com");
-          formData.append("website", "https://for-you-5ez.pages.dev/");
+          formData.append("website", currentURL);
           formData.append("userAgent", userAgent);
-          formData.append("screenSize", screenSize);
           formData.append("visitTime", visitTime);
-          formData.append("ipAddress", "Failed to retrieve");
-
-          await fetch("https://formsubmit.co/mkhanmisbah007@gmail.com", {
-            method: "POST",
-            body: formData,
-            headers: {
-              Accept: "application/json",
-            },
-          });
+          
+          // Use the same form submission approach for the fallback
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = 'https://formsubmit.co/mkhanmisbah007@gmail.com';
+          form.style.display = 'none';
+          
+          for (const [key, value] of formData.entries()) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value.toString();
+            form.appendChild(input);
+          }
+          
+          document.body.appendChild(form);
+          form.submit();
+          
+          setTimeout(() => {
+            document.body.removeChild(form);
+          }, 1000);
         }
       } catch (error) {
-        console.error("Failed to send visit notification:", error);
+        console.error('Failed to send visit notification:', error);
       }
     };
-
+    
     // Send the notification
     sendVisitNotification();
   }, []);
