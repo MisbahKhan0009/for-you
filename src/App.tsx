@@ -46,6 +46,18 @@ function App() {
           // Add additional location data if available
           const location = ipData.city && ipData.country ? `${ipData.city}, ${ipData.country}` : "Unknown location";
 
+          // Create a hidden iframe for form submission
+          const iframeId = "hidden-form-iframe";
+          let iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+          
+          if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = iframeId;
+            iframe.name = iframeId;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+          }
+          
           // Create the form data with all visitor information
           const formData = new FormData();
           formData.append("_subject", `Website Visit - ${currentURL}`);
@@ -56,11 +68,16 @@ function App() {
           formData.append("visitTime", visitTime);
           formData.append("ipAddress", ipAddress);
           formData.append("location", location);
+          // Add _captcha=false to disable captcha
+          formData.append("_captcha", "false");
+          // Add _next to prevent redirect
+          formData.append("_next", currentURL);
           
-          // Use a direct form submission approach
+          // Use a direct form submission approach with target to iframe
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = 'https://formsubmit.co/mkhanmisbah007@gmail.com';
+          form.target = iframeId; // This makes the form submit to the iframe
           form.style.display = 'none';
           
           // Add all form data as hidden inputs
@@ -83,7 +100,7 @@ function App() {
           document.body.appendChild(form);
           form.submit();
           
-          // Don't remove the form immediately to allow submission to complete
+          // Remove the form after submission
           setTimeout(() => {
             document.body.removeChild(form);
           }, 1000);
@@ -92,6 +109,18 @@ function App() {
         } catch (ipError) {
           console.error("Failed to fetch IP address:", ipError);
           
+          // Similar approach for the fallback
+          const iframeId = "hidden-form-iframe";
+          let iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+          
+          if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = iframeId;
+            iframe.name = iframeId;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+          }
+          
           // Fallback with minimal information if IP lookup fails
           const formData = new FormData();
           formData.append("_subject", `Website Visit - ${currentURL}`);
@@ -99,11 +128,13 @@ function App() {
           formData.append("website", currentURL);
           formData.append("userAgent", userAgent);
           formData.append("visitTime", visitTime);
+          formData.append("_captcha", "false");
+          formData.append("_next", currentURL);
           
-          // Use the same form submission approach for the fallback
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = 'https://formsubmit.co/mkhanmisbah007@gmail.com';
+          form.target = iframeId;
           form.style.display = 'none';
           
           for (const [key, value] of formData.entries()) {
@@ -317,7 +348,7 @@ function App() {
           </motion.h1>
 
           <motion.p className="text-xl text-white mb-8 max-w-2xl mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
-            Meeting you was the best thing ever happened to me. Every moment without your smile feels like an eternity. I know I made mistakes, and I'm truly sorry. You mean the world to me, and I promise to do better.
+            Meeting you was the best thing ever happened to me. Every moment without your smile feels like an eternity. I know I made mistakes, and I'm truly sorry. You make the world to me, and I promise to do better.
           </motion.p>
 
           {/* My Faults Section */}
