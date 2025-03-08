@@ -419,7 +419,7 @@ function App() {
           <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto mb-16 bg-[#355070]/30 p-8 rounded-2xl backdrop-blur-sm">
             <h2 className="text-4xl font-bold text-[#eaac8b] mb-8">Little Things I Miss</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[{ text: "Your morning texts that brighten my day" }, { text: "The way you scrunch your nose when you laugh" }, { text: "Our random midnight snack adventures" }, { text: "How you always know when I need a hug" }].map((item, index) => (
+              {[{ text: "Your morning texts that brighten my day" }, { text: "The way you smile when you're shy" }, { text: "Our study time together" }, { text: "How you always know what I need" }].map((item, index) => (
                 <motion.div key={index} className="bg-[#6d597a]/20 p-4 rounded-lg" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
                   <div className="flex justify-start items-center">
                     <Stars className="w-5 h-5 text-[#eaac8b] pe-1" />
