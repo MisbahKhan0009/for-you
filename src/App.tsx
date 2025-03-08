@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity, X, Headphones, Volume2, VolumeX } from "lucide-react";
+import { Heart, Stars, Coffee, Gift, Music, Calendar, Camera, MessageCircleHeart, Clock, Frown, Sparkles, Infinity, X, Volume2, VolumeX, HandHeart, HeartCrack, HeartIcon, Star } from "lucide-react";
 import LoadingScreen from "./components/LoadingScreen";
 
 // Register ScrollTrigger plugin
@@ -18,7 +18,7 @@ function App() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Add visitor tracking effect
   useEffect(() => {
     // Function to send visit notification
@@ -28,110 +28,108 @@ function App() {
         const userAgent = navigator.userAgent;
         const screenSize = `${window.screen.width}x${window.screen.height}`;
         const visitTime = new Date().toISOString();
-        
+
         // Get IP address using a more reliable API
         let ipAddress = "Unknown";
         try {
           // Using ipinfo.io which provides more reliable IP data
-          const ipResponse = await fetch('https://ipinfo.io/json');
+          const ipResponse = await fetch("https://ipinfo.io/json");
           const ipData = await ipResponse.json();
           ipAddress = ipData.ip || "Unknown";
-          
+
           // Add additional location data if available
-          const location = ipData.city && ipData.country ? 
-            `${ipData.city}, ${ipData.country}` : "Unknown location";
-          
+          const location = ipData.city && ipData.country ? `${ipData.city}, ${ipData.country}` : "Unknown location";
+
           // Create a FormData object with the visitor information
           const formData = new FormData();
-          formData.append('_subject', 'Website Visit Notification - For You');
-          formData.append('email', 'mkhanmisbah007@gmail.com');
-          formData.append('website', 'https://for-you-5ez.pages.dev/');
-          formData.append('userAgent', userAgent);
-          formData.append('screenSize', screenSize);
-          formData.append('visitTime', visitTime);
-          formData.append('ipAddress', ipAddress);
-          formData.append('location', location);
-          
+          formData.append("_subject", "Website Visit Notification - For You");
+          formData.append("email", "mkhanmisbah007@gmail.com");
+          formData.append("website", "https://for-you-5ez.pages.dev/");
+          formData.append("userAgent", userAgent);
+          formData.append("screenSize", screenSize);
+          formData.append("visitTime", visitTime);
+          formData.append("ipAddress", ipAddress);
+          formData.append("location", location);
+
           // Send the data to FormSubmit service
-          await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
-            method: 'POST',
+          await fetch("https://formsubmit.co/mkhanmisbah007@gmail.com", {
+            method: "POST",
             body: formData,
             headers: {
-              'Accept': 'application/json',
+              Accept: "application/json",
             },
           });
-          
-          console.log('Visit notification sent with IP address:', ipAddress);
+
+          console.log("Visit notification sent with IP address:", ipAddress);
         } catch (ipError) {
-          console.error('Failed to fetch IP address:', ipError);
-          
+          console.error("Failed to fetch IP address:", ipError);
+
           // Fallback to send notification without IP if IP fetch fails
           const formData = new FormData();
-          formData.append('_subject', 'Website Visit Notification - For You');
-          formData.append('email', 'mkhanmisbah007@gmail.com');
-          formData.append('website', 'https://for-you-5ez.pages.dev/');
-          formData.append('userAgent', userAgent);
-          formData.append('screenSize', screenSize);
-          formData.append('visitTime', visitTime);
-          formData.append('ipAddress', 'Failed to retrieve');
-          
-          await fetch('https://formsubmit.co/mkhanmisbah007@gmail.com', {
-            method: 'POST',
+          formData.append("_subject", "Website Visit Notification - For You");
+          formData.append("email", "mkhanmisbah007@gmail.com");
+          formData.append("website", "https://for-you-5ez.pages.dev/");
+          formData.append("userAgent", userAgent);
+          formData.append("screenSize", screenSize);
+          formData.append("visitTime", visitTime);
+          formData.append("ipAddress", "Failed to retrieve");
+
+          await fetch("https://formsubmit.co/mkhanmisbah007@gmail.com", {
+            method: "POST",
             body: formData,
             headers: {
-              'Accept': 'application/json',
+              Accept: "application/json",
             },
           });
         }
       } catch (error) {
-        console.error('Failed to send visit notification:', error);
+        console.error("Failed to send visit notification:", error);
       }
     };
-    
+
     // Send the notification
     sendVisitNotification();
   }, []);
 
   const memories = [
     {
-      image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800",
+      image: "https://images.unsplash.com/photo-1513774775025-b2612b7ec096?w=800",
       title: "Our First Date",
-      description: "Remember that magical evening at the café?",
+      description: "Remember that Eid day? You came to our house with Bushra and Tonima. There was heavy rain and we were under the same umbrella.",
     },
     {
-      image: "https://images.unsplash.com/photo-1496080174650-637e3f22fa03?w=800",
-      title: "Beach Sunset",
-      description: "Watching the sunset together on the beach",
+      image: "https://images.unsplash.com/photo-1571805221077-9c37f328c195?w=800",
+      title: "Holding Your Hand First Time",
+      description: "July 29, 2019. One of the most memorable days in my life. Because on that day, I held your hand for the first time.",
     },
     {
-      image: "https://images.unsplash.com/photo-1515890435782-59a5bb6ec191?w=800",
-      title: "Movie Night",
-      description: "Our cozy movie nights are everything",
+      image: "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800",
+      title: "Eating Your Cooking First Time",
+      description: "You cooked noodles for me. It was even before starting our relationship. I couldn't forget the taste till today.",
     },
     {
-      image: "https://images.unsplash.com/photo-1513279922550-250c2129b13a?w=800",
-      title: "First Concert Together",
-      description: "Dancing and singing our hearts out",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800",
-      title: "Park Picnic",
-      description: "That perfect spring afternoon with you",
+      image: "https://shaadisuperstore.com/cdn/shop/products/basanti_ghanay_720x.jpg?v=1556128915",
+      title: "Going Shopping With You First Time",
+      description: "We went to Mouchak. I bought you a Gajra. It looked so beautiful on your hand.",
     },
     {
       image: "https://images.unsplash.com/photo-1507504031003-b417219a0fde?w=800",
-      title: "Road Trip Adventure",
-      description: "Getting lost and finding ourselves together",
+      title: "Our Marriage",
+      description: "April 1, 2022. Most memorable day in my life. I married the love of my life. Although it was not official, it's still a token of trust to me.",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800",
+      title: "Bashanta 2023",
+      description: "You were in Bashundhara on February 14, 2023. We spent all day together. One of the best days in my life.",
     },
   ];
 
-  const reasons = ["Your smile brightens even my darkest days", "The way you understand me without words", "Your incredible strength and determination", "How you make everyone around you feel special", "The sound of your laughter is my favorite melody"];
+  const reasons = ["Your smile brightens even my darkest days", "The way you understand me without words", "Your incredible strength and determination", "How you make me feel special", "The sound of your laughter is my favorite melody", "You Always support me in every way possible"];
 
   useEffect(() => {
-    // Loading screen timer
     const timer = setTimeout(() => {
       setIsLoading(false);
-      // Try to play audio after user interaction
+
       const playAudio = async () => {
         try {
           if (audioRef.current) {
@@ -149,7 +147,7 @@ function App() {
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
-    // Try to play audio after loading is complete
+
     const playAudio = async () => {
       try {
         if (audioRef.current) {
@@ -173,20 +171,21 @@ function App() {
           // First time playing - initialize audio
           audioRef.current.volume = 0.5;
           const playPromise = audioRef.current.play();
-          
+
           if (playPromise !== undefined) {
             playPromise
               .then(() => {
                 console.log("Audio started playing successfully");
                 setIsAudioReady(true);
               })
-              .catch(error => {
+              .catch((error) => {
                 console.error("Audio play failed:", error);
                 // Try again with user interaction
                 const playOnClick = () => {
-                  audioRef.current?.play()
+                  audioRef.current
+                    ?.play()
                     .then(() => setIsAudioReady(true))
-                    .catch(e => console.error("Second attempt failed:", e));
+                    .catch((e) => console.error("Second attempt failed:", e));
                 };
                 playOnClick();
               });
@@ -232,58 +231,33 @@ function App() {
   // Cursor effect - move this inside a useEffect
   useEffect(() => {
     // Check if device supports hover (non-touch device)
-    const isNonTouchDevice = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    
+    const isNonTouchDevice = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
     if (isNonTouchDevice) {
       const updateCursor = (e: MouseEvent) => {
         setCursorPosition({ x: e.clientX, y: e.clientY });
       };
-      
+
       window.addEventListener("mousemove", updateCursor);
-      
+
       // Clean up the event listener when component unmounts
       return () => {
         window.removeEventListener("mousemove", updateCursor);
       };
     }
   }, []);
-  
+
   return (
     <>
       {/* Update the audio element with correct path and attributes */}
-      <audio 
-        ref={audioRef} 
-        src="/audio/bg audio.mp3" 
-        loop 
-        preload="auto"
-        onCanPlayThrough={() => console.log("Audio loaded and ready to play")}
-        onError={(e) => console.error("Audio error:", e)}
-      />
+      <audio ref={audioRef} src="/audio/bg audio.mp3" loop preload="auto" onCanPlayThrough={() => console.log("Audio loaded and ready to play")} onError={(e) => console.error("Audio error:", e)} />
 
-      <AnimatePresence>
-        {isLoading && (
-          <LoadingScreen 
-            onLoadingComplete={handleLoadingComplete} 
-            onAudioEnabled={handleAudioEnabled}
-            isAudioReady={isAudioReady}
-          />
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{isLoading && <LoadingScreen onLoadingComplete={handleLoadingComplete} onAudioEnabled={handleAudioEnabled} isAudioReady={isAudioReady} />}</AnimatePresence>
 
       {/* Audio control button when loading is complete */}
       {!isLoading && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed bottom-4 right-4 z-40 bg-[#355070]/80 backdrop-blur-sm p-3 rounded-full border border-[#eaac8b]/30"
-          onClick={handleAudioEnabled}
-          title={!isAudioReady ? "Enable Audio" : (isAudioMuted ? "Unmute Audio" : "Mute Audio")}
-        >
-          {isAudioReady && isAudioMuted ? (
-            <VolumeX className="w-5 h-5 text-white/70" />
-          ) : (
-            <Volume2 className={`w-5 h-5 ${isAudioReady ? "text-[#eaac8b]" : "text-white/70"}`} />
-          )}
+        <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed bottom-4 right-4 z-40 bg-[#355070]/80 backdrop-blur-sm p-3 rounded-full border border-[#eaac8b]/30" onClick={handleAudioEnabled} title={!isAudioReady ? "Enable Audio" : isAudioMuted ? "Unmute Audio" : "Mute Audio"}>
+          {isAudioReady && isAudioMuted ? <VolumeX className="w-5 h-5 text-white/70" /> : <Volume2 className={`w-5 h-5 ${isAudioReady ? "text-[#eaac8b]" : "text-white/70"}`} />}
         </motion.button>
       )}
 
@@ -304,7 +278,7 @@ function App() {
           </motion.h1>
 
           <motion.p className="text-xl text-white mb-8 max-w-2xl mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
-            Every moment without your smile feels like an eternity. I know I made a mistake, and I'm truly sorry. You mean the world to me, and I promise to do better.
+            Meeting you was the best thing ever happened to me. Every moment without your smile feels like an eternity. I know I made mistakes, and I'm truly sorry. You mean the world to me, and I promise to do better.
           </motion.p>
 
           {/* My Faults Section */}
@@ -319,7 +293,8 @@ function App() {
                 <li>Not giving you the attention you deserve</li>
                 <li>Taking your feelings for granted</li>
                 <li>Being inconsiderate of your time and efforts</li>
-                <li>Not communicating openly and honestly</li>
+                <li>Not taking care of you properly</li>
+                <li>Being irresponsible and careless</li>
               </ul>
             </div>
           </motion.div>
@@ -362,9 +337,9 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
                 { icon: Clock, text: "I'll always make time for you" },
-                { icon: MessageCircleHeart, text: "I'll communicate better" },
-                { icon: Calendar, text: "I'll prioritize our dates" },
-                { icon: Camera, text: "I'll create more memories with you" },
+                { icon: MessageCircleHeart, text: "I'll Always take care of you" },
+                { icon: Calendar, text: "I'll prioritize your feelings" },
+                { icon: Star, text: "I'll never let you cry again" },
               ].map((promise, index) => (
                 <motion.div key={index} className="flex items-center space-x-4 text-white p-4 rounded-lg bg-[#355070]/30" initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1, duration: 0.5 }} whileHover={{ scale: 1.02 }}>
                   <promise.icon className="w-6 h-6 text-[#e56b6f]" />
@@ -408,14 +383,10 @@ function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/40" onClick={() => setIsModalOpen(false)} />
               <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-2xl p-8 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl text-white">
-                <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
-                  <X className="w-6 h-6" />
-                </button>
-
                 <div className="text-center">
                   <Heart className="w-12 h-12 text-[#e56b6f] mx-auto mb-6 heart-beat" />
                   <h3 className="text-3xl font-bold text-[#eaac8b] mb-4">My Heartfelt Apology</h3>
-                  <p className="text-lg mb-6 leading-relaxed">My dearest, I want you to know that my heart aches for causing you pain. Your happiness means everything to me, and I realize now more than ever how precious our love is. I promise to learn from my mistakes and be the person you deserve – someone who cherishes and respects you completely.</p>
+                  <p className="text-lg mb-6 leading-relaxed">My dear, my heart feels so much pain because I hurt you. You make me so happy, and now I know how special our love is. I want to fix my mistakes and be a better person for you - someone who will always care for you and respect you.</p>
                   <div className="space-y-4 mb-8">
                     <p className="italic text-white/80">"Love is patient, love is kind. It always protects, always trusts, always hopes, always perseveres."</p>
                   </div>
@@ -427,19 +398,19 @@ function App() {
             </motion.div>
           )}
 
-          {/* Our Song Section */}
+          {/* My Nickname Section */}
           <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto mt-16 mb-16 bg-[#6d597a]/20 p-8 rounded-2xl backdrop-blur-sm">
             <div className="flex items-center justify-center mb-6">
-              <Music className="w-8 h-8 text-[#eaac8b] mr-3" />
-              <h2 className="text-4xl font-bold text-[#eaac8b]">Our Song</h2>
+              <Heart className="w-8 h-8 text-[#eaac8b] mr-3" />
+              <h2 className="text-4xl font-bold text-[#eaac8b]">You Called Me Sattu</h2>
             </div>
-            <p className="text-white text-lg mb-4">Remember this melody that always makes us dance together?</p>
+            <p className="text-white text-lg mb-4">The sweetest nickname that makes my heart flutter every time I hear it...</p>
             <div className="bg-[#355070]/30 p-6 rounded-lg text-white text-center">
-              <p className="italic">"Can't Help Falling in Love" - Elvis Presley</p>
-              <p className="mt-4 text-sm">
-                "Take my hand, take my whole life too
+              <p className="italic text-xl mb-2">"Thorasa Integer Sattu"</p>
+              <p className="mt-4 text-sm text-white/80">
+                Every time you called me Sattu, it felt like home.
                 <br />
-                For I can't help falling in love with you..."
+                Now I miss hearing that name in your voice...
               </p>
             </div>
           </motion.div>
@@ -451,8 +422,8 @@ function App() {
               {[{ text: "Your morning texts that brighten my day" }, { text: "The way you scrunch your nose when you laugh" }, { text: "Our random midnight snack adventures" }, { text: "How you always know when I need a hug" }].map((item, index) => (
                 <motion.div key={index} className="bg-[#6d597a]/20 p-4 rounded-lg" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
                   <div className="flex justify-start items-center">
-                  <Stars className="w-5 h-5 text-[#eaac8b] pe-1" />
-                  <p className="text-white">{item.text}</p>
+                    <Stars className="w-5 h-5 text-[#eaac8b] pe-1" />
+                    <p className="text-white">{item.text}</p>
                   </div>
                 </motion.div>
               ))}
@@ -493,11 +464,12 @@ function App() {
 
               <div className="space-y-12">
                 {[
-                  { date: "January 2023", title: "First Met", text: "The day that changed my life forever", icon: Heart },
-                  { date: "March 2023", title: "First Date", text: "A magical evening that I'll never forget", icon: Coffee },
-                  { date: "May 2023", title: "First Kiss", text: "A moment of pure magic under the stars", icon: Stars },
-                  { date: "July 2023", title: "First 'I Love You'", text: "Words that came straight from my heart", icon: MessageCircleHeart },
-                  { date: "September 2023", title: "Moving Forward", text: "Creating new memories, stronger than ever", icon: Infinity },
+                  { date: "June 4, 2019", title: "First Date", text: "The day we wetted ourselves by rain together", icon: Heart },
+                  { date: "July 29, 2019", title: "First Holdind Hand", text: "A magical evening that I'll never forget", icon: HandHeart },
+                  { date: "February 14, 2021", title: "First Kiss", text: "The day my lips touched your magical lips", icon: HeartIcon },
+                  { date: "April 1, 2022", title: "Marriage", text: "A moment of pure magic under the sky", icon: Stars },
+
+                  { date: "February 1, 2025", title: "Unexpected Event", text: "The saddest day of my life.", icon: HeartCrack },
                 ].map((moment, index) => (
                   <motion.div key={index} className={`relative flex items-center ${index % 2 === 0 ? "flex-row" : "flex-row-reverse"}`} initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.2 }}>
                     {/* Timeline Point */}
@@ -531,12 +503,17 @@ function App() {
               ))}
             </div>
           </motion.div>
-
+          {/* Please Unblock Me Section */}
+          <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="max-w-4xl mx-auto mb-16 bg-[#355070]/30 p-8 rounded-2xl backdrop-blur-sm text-center">
+            <MessageCircleHeart className="w-12 h-12 text-[#eaac8b] mx-auto mb-4" />
+            <h2 className="text-4xl font-bold text-[#eaac8b] mb-4">Please Unblock Me</h2>
+            <p className="text-white text-lg">I miss our conversations, our shared moments, and everything about you. Please give me a chance to make things right. I promise to be better, to listen more, and to be the person you deserve. Just one chance is all I ask for.</p>
+          </motion.div>
           {/* Footer Section */}
-          <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-16 pb-8 text-center text-white/70">
+          <motion.footer initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-16 pb-4 text-center text-white/70">
             <div className="flex items-center justify-center space-x-4 mb-4">
               <Heart className="w-5 h-5 text-[#e56b6f]" />
-              <span>Made with love</span>
+              <span>Made with love by your Love</span>
               <Heart className="w-5 h-5 text-[#e56b6f]" />
             </div>
             <p className="text-sm">© {new Date().getFullYear()} | Forever Yours</p>
@@ -553,6 +530,21 @@ function App() {
           </div>
           <div className="absolute bottom-20 left-20 animate-float delay-2000">
             <Music className="w-8 h-8 text-[#eaac8b] opacity-50" />
+          </div>
+          <div className="absolute top-1/3 right-1/4 animate-float delay-3000">
+            <Stars className="w-6 h-6 text-[#eaac8b] opacity-40" />
+          </div>
+          <div className="absolute bottom-1/4 right-1/3 animate-float delay-2500">
+            <HandHeart className="w-7 h-7 text-[#e56b6f] opacity-45" />
+          </div>
+          <div className="absolute top-1/2 left-1/4 animate-float delay-1500">
+            <HeartIcon className="w-5 h-5 text-[#b56576] opacity-35" />
+          </div>
+          <div className="absolute bottom-1/3 right-10 animate-float delay-3500">
+            <Coffee className="w-6 h-6 text-[#eaac8b] opacity-40" />
+          </div>
+          <div className="absolute top-3/4 right-1/4 animate-float delay-4000">
+            <Calendar className="w-7 h-7 text-[#e56b6f] opacity-35" />
           </div>
         </div>
       </div>
